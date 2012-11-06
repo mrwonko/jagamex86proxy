@@ -337,6 +337,11 @@ typedef struct
 } game_import_t;
 
 
+// signatures of the exported dll functions
+typedef game_export_t* (__cdecl *GetGameAPI_t) ( game_import_t* );
+typedef int  (__cdecl *vmMain_t) ( int command, int ... );
+typedef void (__cdecl *dllEntry_t) ( syscallptr_t );
+
 }
 
 #endif
