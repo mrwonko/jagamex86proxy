@@ -105,7 +105,7 @@ extern "C" __declspec( dllexport ) game_export_t* __cdecl GetGameAPI( game_impor
 	g_imports = *imports;
 
 	// Get the active mod
-	char fs_game[ MAX_QPATH + 1 ]; // not sure about trailing \0, so + 1
+	char fs_game[ 256 + 1 ]; // variables can be up to 256 chars - not sure about trailing \0, so + 1
 	g_imports.Cvar_VariableStringBuffer( "fs_game", fs_game, sizeof( fs_game ) / sizeof( char ) );
 	if( *fs_game == '\0' )
 	{
@@ -119,8 +119,8 @@ extern "C" __declspec( dllexport ) game_export_t* __cdecl GetGameAPI( game_impor
 
 	if( strcmp( fs_game, "base" ) )
 	{
-		char dllName[ MAX_QPATH + 19 ];
-		sprintf_s( dllName, MAX_QPATH + 19, "%s/mod_jagamex86.dll", fs_game );
+		char dllName[ MAX_QPATH + 19 ]; // "/mod_jagamex86.dll\0" is 19 chars.
+		sprintf_s( dllName, 256 + 19, "%s/mod_jagamex86.dll", fs_game );
 		g_modJagamex86 = LoadLibrary( dllName );
 		if( g_modJagamex86 )
 		{
