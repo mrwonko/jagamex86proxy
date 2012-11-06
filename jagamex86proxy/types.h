@@ -4,15 +4,42 @@
 extern "C"
 {
 
+#define MAX_QPATH 64
+
 typedef int ( *syscallptr_t ) ( int call, ... );
 
-typedef void gentity_s; // exact structure to be determined
+typedef float vec3_t[3];
 
-typedef void cvar_t; // exact structure to be determined, probably unchanged
+// exact structure to be determined
+typedef void gentity_t;
+typedef void cvar_t;
+typedef void trace_t;
+typedef void usercmd_t;
+typedef void* EG2_Collision;
+typedef void* SavedGameJustLoaded_e;
+typedef void* qhandle_t;
+typedef void* memtag_t;
+typedef void* Eorientations;
+typedef void* mdxaBone_t;
+typedef void* fileHandle_t;
+typedef void sharedSetBoneIKStateParams_t;
+typedef void sharedIKMoveParams_t;
+typedef void CCollisionRecord;
+typedef void CMiniHeap;
+typedef void CRagDollParams;
+typedef void CRagDollUpdateParams;
+typedef int CGhoul2Info; // can't have void references
+typedef int CGhoul2Info_v; // dito
+typedef int IGhoul2InfoArray; //dito
+typedef int SSkinGoreData; // dito
 
-typedef void usercmd_t; // exact structure to be determined
-
-typedef void* SavedGameJustLoaded_e; // exact structure to be determined
+// mode parm for FS_FOpenFile
+typedef enum {
+	FS_READ,
+	FS_WRITE,
+	FS_APPEND,
+	FS_APPEND_SYNC
+} fsMode_t;
 
 typedef enum {
 	ERR_FATAL,					// exit the entire game with a popup window
@@ -57,7 +84,7 @@ typedef struct
 
 	// shared globals
 
-	gentity_s*	gentities;
+	gentity_t*	gentities;
 	int			gentitySize;
 	int			num_entities;
 } game_export_t;
@@ -67,142 +94,248 @@ typedef struct
 // functions from the engine, to be used by the gamecode dll
 typedef struct
 {
-	void		(*Printf)( const char *fmt, ... ); // 0x0041a1f0
-	void		(*WriteCam)( const char *text ); // 0x0041a380
-	void		(*FlushCam)( int clientNum ); // 0x0041a3e0, called on "flushcam" command
-	
-	void		(*Error)( int, const char *fmt, ... ); // 0x0041a440 Com_Error()
-	void*		unknown002; // 0x00440ba0
-	
-	cvar_t*		(*cvar)( const char *var_name, const char *value, int flags ); // 0x0041bc70
-	void		(*cvar_set)( const char *var_name, const char *value ); // 0x0041c0a0
-	int			(*Cvar_VariableIntegerValue)( const char *var_name ); // 0x0041baf0
-	void		(*Cvar_VariableStringBuffer)( const char *var_name, char *buffer, int bufsize ); // 0x0041bb30
-	
-	int			(*argc)( void ); // 0x00419b50
-	char*		(*argv)( int index ); // 0x00419b60
-	
-	void*		unknown003; // 0x0041efc0 FS_FOpenFile
-	void*		unknown004; // 0x0041d900 FS_Read
-	void*		unknown005; // 0x0041d9f0 FS_Write
-	void*		unknown006; // 0x0041d1c0 FS_FCloseFile
-	void*		unknown007; // 0x0041dbf0 FS_ReadFile
-	void*		unknown008; // 0x0041dcb0 FS_FreeFile
-	void*		unknown009; // 0x0041e3a0 FS_GetFileList
-	void*		unknown010; // 0x0043bdf0
-	void*		unknown011; // 0x0043c260
-	void*		unknown012; // 0x0043c280
-	void*		unknown013; // 0x00419810
-	void*		unknown014; // 0x00438cd0
-	void*		unknown015; // 0x00438c50
-	void*		unknown016; // 0x00439950
-	void*		unknown017; // 0x00439a00
-	void		(*GetUserinfo)( int num, char *buffer, int bufferSize ); // 0x00439ac0
-	void*		unknown018; // 0x00439a70
-	void*		unknown019; // 0x00439180
-	void*		unknown020; // 0x00438d00
-	void*		unknown021; // 0x0043d9a0
-	void*		unknown022; // 0x0043dbb0
-	void*		unknown023; // 0x0040d870
-	void*		unknown024; // 0x00438f10
-	void*		unknown025; // 0x00439000
-	void*		unknown026; // 0x004390c0
-	void*		unknown027; // 0x00417940
-	void*		unknown028; // 0x0043cf90
-	void*		unknown029; // 0x0043cf20
-	void*		unknown030; // 0x0043d4b0
-	void*		unknown031; // 0x00439100
-	void*		unknown032; // 0x008adba0
-	void*		unknown033; // 0x00439200
-	void*		unknown034; // 0x00442b10
-	void*		unknown035; // 0x00442aa0
-	void*		unknown036; // 0x004ce900
-	void*		unknown037; // 0x004ce910
-	void*		unknown038; // 0x004ced00
-	void*		unknown039; // 0x004cf200
-	void*		unknown040; // 0x004cf760
-	void*		unknown041; // 0x004cf6b0
-	void*		unknown042; // 0x004cf860
-	void*		unknown043; // 0x004d0420
-	void*		unknown044; // 0x004cf0e0
-	void*		unknown045; // 0x004cece0
-	void*		unknown046; // 0x004ced30
-	void*		unknown047; // 0x004cee80
-	void*		unknown048; // 0x004ced50
-	void*		unknown049; // 0x004ced80
-	void*		unknown050; // 0x004cee00
-	void*		unknown051; // 0x004cedc0
-	void*		unknown052; // 0x004cf2e0
-	void*		unknown053; // 0x004cf340
-	void*		unknown054; // 0x004cf450
-	void*		unknown055; // 0x004cf4a0
-	void*		unknown056; // 0x004cf510
-	void*		unknown057; // 0x004cf560
-	void*		unknown058; // 0x004cf5e0
-	void*		unknown059; // 0x004cf670
-	void*		unknown060; // 0x004cf920
-	void*		unknown061; // 0x004cf970
-	void*		unknown062; // 0x004cfce0
-	void*		unknown063; // 0x004cfd10
-	void*		unknown064; // 0x004cfd50
-	void*		unknown065; // 0x004cfd80
-	void*		unknown066; // 0x004cfe00
-	void*		unknown067; // 0x004cfe20
-	void*		unknown068; // 0x004cfea0
-	void*		unknown069; // 0x004cfeb0
-	void*		unknown070; // 0x004d0030
-	void*		unknown071; // 0x004d0050
-	void*		unknown072; // 0x004d0070
-	void*		unknown073; // 0x004d02d0
-	void*		unknown074; // 0x004d0300
-	void*		unknown075; // 0x004d0190
-	void*		unknown076; // 0x004d01e0
-	void*		unknown077; // 0x004d0320
-	void*		unknown078; // 0x004ce8d0
-	void*		unknown079; // 0x004ce870
-	void*		unknown080; // 0x004cee30
-	void*		unknown081; // 0x004d0540
-	void*		unknown082; // 0x004d04f0
-	void*		unknown083; // 0x004d0570
-	void*		unknown084; // 0x004d0590
-	void*		unknown085; // 0x004d05e0
-	void*		unknown086; // 0x004cf8c0
-	void*		unknown087; // 0x004cf610
-	void*		unknown088; // 0x004cf7d0
-	void*		unknown089; // 0x004cf060
-	void*		unknown090; // 0x004cf050
-	void*		unknown091; // 0x004d0620
-	void*		unknown092; // 0x004d0630
-	void*		unknown093; // 0x004d0640
-	void*		unknown094; // 0x004d0150
-	void*		unknown095; // 0x004d0170
-	void*		unknown096; // 0x004cee50
-	void*		unknown097; // 0x004cf960
-	void*		unknown098; // 0x004cf9b0
-	void*		unknown099; // 0x004cfab0
-	void*		unknown100; // 0x004cfb20
-	void*		unknown101; // 0x004cfb60
-	void*		unknown102; // 0x004cfbc0
-	void*		unknown103; // 0x004cfbd0
-	void*		unknown104; // 0x004cfc40
-	void*		unknown105; // 0x004cfc90
-	void*		unknown106; // 0x004cfcc0
-	void*		unknown107; // 0x004d0730
-	void*		unknown108; // 0x004d0670
-	void*		unknown109; // 0x00439220
-	void*		unknown110; // 0x00439280
-	void*		unknown111; // 0x00438ed0
-	void*		unknown112; // 0x004676b0
-	void*		unknown113; // 0x00467350
-	void*		unknown114; // 0x00451600
-	void*		unknown115; // 0x00451820
-	void*		unknown116; // 0x004524e0
-	void*		unknown117; // 0x00452560
-	void*		unknown118; // 0x00454600
-	void*		unknown119; // 0x00452510
-	void*		unknown120; // 0x004524c0
-	void*		unknown121; // 0x004525c0
+    //============== general Quake services ==================
+     
+    // print message on the local console
+    void    (*Printf)( const char *fmt, ... );
+     
+    // Write a camera ref_tag to cameras.map
+    void    (*WriteCam)( const char *text );
+    void    (*FlushCamFile)();
+     
+    // abort the game
+    void    (*Error)( int, const char *fmt, ... );
+     
+    // get current time for profiling reasons
+    // this should NOT be used for any game related tasks,
+    // because it is not journaled
+    int     (*Milliseconds)( void );
+     
+    // console variable interaction
+    cvar_t  *(*cvar)( const char *var_name, const char *value, int flags );
+    void    (*cvar_set)( const char *var_name, const char *value );
+    int     (*Cvar_VariableIntegerValue)( const char *var_name );
+    void    (*Cvar_VariableStringBuffer)( const char *var_name, char *buffer, int bufsize );
+     
+    // ClientCommand and ServerCommand parameter access
+    int     (*argc)( void );
+    char*   (*argv)( int n );
+     
+    int     (*FS_FOpenFile)( const char *qpath, fileHandle_t *file, fsMode_t mode );
+    int     (*FS_Read)( void *buffer, int len, fileHandle_t f );
+    int     (*FS_Write)( const void *buffer, int len, fileHandle_t f );
+    void    (*FS_FCloseFile)( fileHandle_t f );
+    int     (*FS_ReadFile)( const char *name, void **buf );
+    void    (*FS_FreeFile)( void *buf );
+    int     (*FS_GetFileList)(  const char *path, const char *extension, char *listbuf, int bufsize );
+     
+    // Savegame handling
+    //
+    qboolean (*AppendToSaveGame)(unsigned long chid, const void *data, int length);
+	// ppvAddressPtr default: NULL
+    int     (*ReadFromSaveGame)(unsigned long chid, void *pvAddress, int iLength, void **ppvAddressPtr);
+	// ppvAddressPtr default: NULL
+    int     (*ReadFromSaveGameOptional)(unsigned long chid, void *pvAddress, int iLength, void **ppvAddressPtr);
+
+    // add commands to the console as if they were typed in
+    // for map changing, etc
+    void    (*SendConsoleCommand)( const char *text );
+     
+     
+    //=========== server specific functionality =============
+     
+    // kick a client off the server with a message
+    void    (*DropClient)( int clientNum, const char *reason );
+     
+    // reliably sends a command string to be interpreted by the given
+    // client.  If clientNum is -1, it will be sent to all clients
+    void    (*SendServerCommand)( int clientNum, const char *fmt, ... );
+     
+    // config strings hold all the index strings, and various other information
+    // that is reliably communicated to all clients
+    // All of the current configstrings are sent to clients when
+    // they connect, and changes are sent to all connected clients.
+    // All confgstrings are cleared at each level start.
+    void    (*SetConfigstring)( int num, const char *string );
+    void    (*GetConfigstring)( int num, char *buffer, int bufferSize );
+     
+    // userinfo strings are maintained by the server system, so they
+    // are persistant across level loads, while all other game visible
+    // data is completely reset
+    void    (*GetUserinfo)( int num, char *buffer, int bufferSize );
+    void    (*SetUserinfo)( int num, const char *buffer );
+     
+    // the serverinfo info string has all the cvars visible to server browsers
+    void    (*GetServerinfo)( char *buffer, int bufferSize );
+     
+    // sets mins and maxs based on the brushmodel name
+    void    (*SetBrushModel)( gentity_t *ent, const char *name );
+     
+    // collision detection against all linked entities
+	// eG2TraceType and useLod default values should be 0
+    void    (*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                    const int passEntityNum, const int contentmask , const EG2_Collision eG2TraceType, const int useLod);
+     
+    // point contents against all linked entities
+    int             (*pointcontents)( const vec3_t point, int passEntityNum );
+    // what contents are on the map?
+    int             (*totalMapContents)();
+     
+    qboolean        (*inPVS)( const vec3_t p1, const vec3_t p2 );
+    qboolean        (*inPVSIgnorePortals)( const vec3_t p1, const vec3_t p2 );
+    void            (*AdjustAreaPortalState)( gentity_t *ent, qboolean open );
+    qboolean        (*AreasConnected)( int area1, int area2 );
+     
+    // an entity will never be sent to a client or used for collision
+    // if it is not passed to linkentity.  If the size, position, or
+    // solidity changes, it must be relinked.
+    void    (*linkentity)( gentity_t *ent );
+    void    (*unlinkentity)( gentity_t *ent );              // call before removing an interactive entity
+     
+    // EntitiesInBox will return brush models based on their bounding box,
+    // so exact determination must still be done with EntityContact
+    int             (*EntitiesInBox)( const vec3_t mins, const vec3_t maxs, gentity_t **list, int maxcount );
+     
+    // perform an exact check against inline brush models of non-square shape
+    qboolean        (*EntityContact)( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
+     
+    // sound volume values
+    int             *VoiceVolume;
+     
+    // dynamic memory allocator for things that need to be freed
+    void            *(*Malloc)( int iSize, memtag_t eTag, qboolean bZeroIt);        // see qcommon/tags.h for choices
+    int                     (*Free)( void *buf );
+    qboolean        (*bIsFromZone)( void *buf, memtag_t eTag);      // see qcommon/tags.h for choices
+     
+	/*
+	Ghoul2 Insert Start
+	*/
+	qhandle_t       (*G2API_PrecacheGhoul2Model)(const char *fileName);
+     
+    // defualt values: customSkin = NULL, customShader = NULL, modelFlags = 0, lodBias = 0
+	int                     (*G2API_InitGhoul2Model)(CGhoul2Info_v &ghoul2, const char *fileName, int modelIndex, qhandle_t customSkin, qhandle_t customShader, int modelFlags, int lodBias);
+	// default values: renderSkin = 0
+	qboolean        (*G2API_SetSkin)(CGhoul2Info *ghlInfo, qhandle_t customSkin, qhandle_t renderSkin );
+	// default values: setFrame = -1, blendTime = -1
+	qboolean        (*G2API_SetBoneAnim)(CGhoul2Info *ghlInfo, const char *boneName, const int startFrame, const int endFrame, const int flags, const float animSpeed, const int currentTime, const float setFrame, const int blendTime);
+	// default values: blendTime = 0, blendStart = 0
+	qboolean        (*G2API_SetBoneAngles)(CGhoul2Info *ghlInfo, const char *boneName, const vec3_t angles, const int flags, const Eorientations up, const Eorientations right, const Eorientations forward, qhandle_t *modelList, int blendTime, int blendStart);
+	// default values: blendTime = 0, currentTime = 0
+	qboolean        (*G2API_SetBoneAnglesIndex)(CGhoul2Info *ghlInfo, const int index, const vec3_t angles, const int flags, const Eorientations yaw, const Eorientations pitch, const Eorientations roll, qhandle_t *modelList, int blendTime, int currentTime);
+	// default values: blendTime = 0, currentTime = 0
+	qboolean        (*G2API_SetBoneAnglesMatrix)(CGhoul2Info *ghlInfo, const char *boneName, const mdxaBone_t &matrix, const int flags, qhandle_t *modelList, int blendTime, int currentTime);
+	// default values: modelIndex = -1
+	void            (*G2API_CopyGhoul2Instance)(CGhoul2Info_v &ghoul2From, CGhoul2Info_v &ghoul2To, int modelIndex);
+	// default values: setFrame = -1, blendTime = -1
+	qboolean        (*G2API_SetBoneAnimIndex)(CGhoul2Info *ghlInfo, const int index, const int startFrame, const int endFrame, const int flags, const float animSpeed, const int currentTime, const float setFrame, const int blendTime);
+     
+	qboolean        (*G2API_SetLodBias)(CGhoul2Info *ghlInfo, int lodBias);
+	qboolean        (*G2API_SetShader)(CGhoul2Info *ghlInfo, qhandle_t customShader);
+	qboolean        (*G2API_RemoveGhoul2Model)(CGhoul2Info_v &ghlInfo, const int modelIndex);
+	qboolean        (*G2API_SetSurfaceOnOff)(CGhoul2Info *ghlInfo, const char *surfaceName, const int flags);
+	qboolean        (*G2API_SetRootSurface)(CGhoul2Info_v &ghlInfo, const int modelIndex, const char *surfaceName);
+	qboolean        (*G2API_RemoveSurface)(CGhoul2Info *ghlInfo, const int index);
+	int                     (*G2API_AddSurface)(CGhoul2Info *ghlInfo, int surfaceNumber, int polyNumber, float BarycentricI, float BarycentricJ, int lod );
+	qboolean        (*G2API_GetBoneAnim)(CGhoul2Info *ghlInfo, const char *boneName, const int currentTime, float *currentFrame,
+																int *startFrame, int *endFrame, int *flags, float *animSpeed, int *modelList);
+	qboolean        (*G2API_GetBoneAnimIndex)(CGhoul2Info *ghlInfo, const int iBoneIndex, const int currentTime, float *currentFrame,
+																int *startFrame, int *endFrame, int *flags, float *animSpeed, int *modelList);
+	qboolean        (*G2API_GetAnimRange)(CGhoul2Info *ghlInfo, const char *boneName,       int *startFrame, int *endFrame);
+	qboolean        (*G2API_GetAnimRangeIndex)(CGhoul2Info *ghlInfo, const int boneIndex,   int *startFrame, int *endFrame);
+     
+	qboolean        (*G2API_PauseBoneAnim)(CGhoul2Info *ghlInfo, const char *boneName, const int currentTime);
+	qboolean        (*G2API_PauseBoneAnimIndex)(CGhoul2Info *ghlInfo, const int boneIndex, const int currentTime);
+	qboolean        (*G2API_IsPaused)(CGhoul2Info *ghlInfo, const char *boneName);
+	qboolean        (*G2API_StopBoneAnim)(CGhoul2Info *ghlInfo, const char *boneName);
+	qboolean        (*G2API_StopBoneAngles)(CGhoul2Info *ghlInfo, const char *boneName);
+	qboolean        (*G2API_RemoveBone)(CGhoul2Info *ghlInfo, const char *boneName);
+	qboolean        (*G2API_RemoveBolt)(CGhoul2Info *ghlInfo, const int index);
+	int                     (*G2API_AddBolt)(CGhoul2Info *ghlInfo, const char *boneName);
+	int                     (*G2API_AddBoltSurfNum)(CGhoul2Info *ghlInfo, const int surfIndex);
+	qboolean        (*G2API_AttachG2Model)(CGhoul2Info *ghlInfo, CGhoul2Info *ghlInfoTo, int toBoltIndex, int toModel);
+	qboolean        (*G2API_DetachG2Model)(CGhoul2Info *ghlInfo);
+	qboolean        (*G2API_AttachEnt)(int *boltInfo, CGhoul2Info *ghlInfoTo, int toBoltIndex, int entNum, int toModelNum);
+	void            (*G2API_DetachEnt)(int *boltInfo);
+     
+	qboolean        (*G2API_GetBoltMatrix)(CGhoul2Info_v &ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix, const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, const vec3_t scale);
+     
+	void            (*G2API_ListSurfaces)(CGhoul2Info *ghlInfo);
+	void            (*G2API_ListBones)(CGhoul2Info *ghlInfo, int frame);
+	qboolean        (*G2API_HaveWeGhoul2Models)(CGhoul2Info_v &ghoul2);
+	qboolean        (*G2API_SetGhoul2ModelFlags)(CGhoul2Info *ghlInfo, const int flags);
+	int                     (*G2API_GetGhoul2ModelFlags)(CGhoul2Info *ghlInfo);
+     
+	qboolean        (*G2API_GetAnimFileName)(CGhoul2Info *ghlInfo, char **filename);
+	void            (*G2API_CollisionDetect)(CCollisionRecord *collRecMap, CGhoul2Info_v &ghoul2, const vec3_t angles, const vec3_t position,
+																			int frameNumber, int entNum, vec3_t rayStart, vec3_t rayEnd, vec3_t scale, CMiniHeap *G2VertSpace,
+																			EG2_Collision eG2TraceType, int useLod, float fRadius);
+	void            (*G2API_GiveMeVectorFromMatrix)(mdxaBone_t &boltMatrix, Eorientations flags, vec3_t &vec);
+	void            (*G2API_CleanGhoul2Models)(CGhoul2Info_v &ghoul2);
+	IGhoul2InfoArray &              (*TheGhoul2InfoArray)();
+	int                     (*G2API_GetParentSurface)(CGhoul2Info *ghlInfo, const int index);
+	int                     (*G2API_GetSurfaceIndex)(CGhoul2Info *ghlInfo, const char *surfaceName);
+	char            *(*G2API_GetSurfaceName)(CGhoul2Info *ghlInfo, int surfNumber);
+	char            *(*G2API_GetGLAName)(CGhoul2Info *ghlInfo);
+	qboolean        (*G2API_SetNewOrigin)(CGhoul2Info *ghlInfo, const int boltIndex);
+	int                     (*G2API_GetBoneIndex)(CGhoul2Info *ghlInfo, const char *boneName, qboolean bAddIfNotFound);
+	qboolean        (*G2API_StopBoneAnglesIndex)(CGhoul2Info *ghlInfo, const int index);
+	qboolean        (*G2API_StopBoneAnimIndex)(CGhoul2Info *ghlInfo, const int index);
+	qboolean        (*G2API_SetBoneAnglesMatrixIndex)(CGhoul2Info *ghlInfo, const int index, const mdxaBone_t &matrix,
+																		const int flags, qhandle_t *modelList, int blendTime, int currentTime);
+	qboolean        (*G2API_SetAnimIndex)(CGhoul2Info *ghlInfo, const int index);
+	int                     (*G2API_GetAnimIndex)(CGhoul2Info *ghlInfo);
+	void            (*G2API_SaveGhoul2Models)(CGhoul2Info_v &ghoul2);
+	void            (*G2API_LoadGhoul2Models)(CGhoul2Info_v &ghoul2, char *buffer);
+	void            (*G2API_LoadSaveCodeDestructGhoul2Info)(CGhoul2Info_v &ghoul2);
+	char            *(*G2API_GetAnimFileNameIndex)(qhandle_t modelIndex);
+	char            *(*G2API_GetAnimFileInternalNameIndex)(qhandle_t modelIndex);
+	int                     (*G2API_GetSurfaceRenderStatus)(CGhoul2Info *ghlInfo, const char *surfaceName);
+     
+	//rww - RAGDOLL_BEGIN
+	void            (*G2API_SetRagDoll)(CGhoul2Info_v &ghoul2, CRagDollParams *parms);
+	void            (*G2API_AnimateG2Models)(CGhoul2Info_v &ghoul2, int AcurrentTime, CRagDollUpdateParams *params);
+     
+	qboolean        (*G2API_RagPCJConstraint)(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t min, vec3_t max);
+	qboolean        (*G2API_RagPCJGradientSpeed)(CGhoul2Info_v &ghoul2, const char *boneName, const float speed);
+	qboolean        (*G2API_RagEffectorGoal)(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos);
+	qboolean        (*G2API_GetRagBonePos)(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos, vec3_t entAngles, vec3_t entPos, vec3_t entScale);
+	qboolean        (*G2API_RagEffectorKick)(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t velocity);
+	qboolean        (*G2API_RagForceSolve)(CGhoul2Info_v &ghoul2, qboolean force);
+     
+	qboolean        (*G2API_SetBoneIKState)(CGhoul2Info_v &ghoul2, int time, const char *boneName, int ikState, sharedSetBoneIKStateParams_t *params);
+	qboolean        (*G2API_IKMove) (CGhoul2Info_v &ghoul2, int time, sharedIKMoveParams_t *params);
+	//rww - RAGDOLL_END
+     
+	void            (*G2API_AddSkinGore)(CGhoul2Info_v &ghoul2,SSkinGoreData &gore);
+	void            (*G2API_ClearSkinGore)( CGhoul2Info_v &ghoul2 );
+     
+	void            (*RMG_Init)(int terrainID);
+	#ifndef _XBOX
+	int                     (*CM_RegisterTerrain)(const char *info);
+	#endif
+	const char      *(*SetActiveSubBSP)(int index);
+     
+     
+	int                     (*RE_RegisterSkin)(const char *name);
+	int                     (*RE_GetAnimationCFG)(const char *psCFGFilename, char *psDest, int iDestSize);
+     
+	bool            (*WE_GetWindVector)(vec3_t windVector, vec3_t atpoint);
+	bool            (*WE_GetWindGusting)(vec3_t atpoint);
+	bool            (*WE_IsOutside)(vec3_t pos);
+	float           (*WE_IsOutsideCausingPain)(vec3_t pos);
+	float           (*WE_GetChanceOfSaberFizz)(void);
+	bool            (*WE_IsShaking)(vec3_t pos);
+	void            (*WE_AddWeatherZone)(vec3_t mins, vec3_t maxs);
+	bool            (*WE_SetTempGlobalFogColor)(vec3_t color);
+     
+     
+	/*
+	Ghoul2 Insert End
+	*/
+     
+     
 } game_import_t;
+
 
 }
 
